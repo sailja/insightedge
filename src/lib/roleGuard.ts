@@ -1,28 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { AuthPayload } from "./auth";
 
-export function requireRole(roles: Array<"USER" | "ADMIN">) {
-  return (req: NextRequest) => {
-    const token = req.cookies.get("accessToken")?.value;
+export function requireAdmin(user: AuthPayload) {
+  if (user.role !== "ADMIN") {
+    throw new Error("Forbidden");
+  }
+}
 
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        id: string;
-        role: "USER" | "ADMIN";
-      };
-
-      if (!roles.includes(decoded.role)) {
-        return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-      }
-
-      (req as any).user = decoded;
-      return null;
-    } catch {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-    }
-  };
+export function requireRole(user: AuthPayload, roles: AuthPayload["role"][]) {
+  if (!roles.includes(user.role)) {
+    throw new Error("Forbidden");
+  }
 }

@@ -1,8 +1,15 @@
+import { rateLimit } from "@/src/lib/rateLimiter";
 import { registerUser } from "@/src/services/auth.service";
 import { registerSchema } from "@/src/validators/auth.schema";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forward-for") || "unknown";
+  const limitError = rateLimit(`register:${ip}`);
+
+  if (limitError) {
+    return NextResponse.json({ message: limitError }, { status: 429 });
+  }
   try {
     const body = await request.json();
     const result = registerSchema.safeParse(body);

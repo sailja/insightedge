@@ -1,10 +1,17 @@
 import { signToken } from "@/src/lib/jwt";
+import { rateLimit } from "@/src/lib/rateLimiter";
 import { loginUser } from "@/src/services/auth.service";
 import { generateRefreshToken } from "@/src/services/token.service";
 import { loginSchema } from "@/src/validators/auth.schema";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forward-for") || "unknown";
+  const limitError = rateLimit(`login:${ip}`);
+
+  if (limitError) {
+    return NextResponse.json({ message: limitError }, { status: 429 });
+  }
   try {
     const body = await request.json();
     const result = loginSchema.safeParse(body);
@@ -33,7 +40,7 @@ export async function POST(request: Request) {
       },
     });
 
-    response.cookies.set("token", token, {
+    response.cookies.set("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",

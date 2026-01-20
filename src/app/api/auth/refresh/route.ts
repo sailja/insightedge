@@ -1,8 +1,15 @@
 import { prisma } from "@/src/lib/prisma";
+import { rateLimit } from "@/src/lib/rateLimiter";
 import { generateRefreshToken, signAccessToken } from "@/src/services/token.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forward-for") || "unknown";
+  const limitError = rateLimit(`refresh:${ip}`);
+
+  if (limitError) {
+    return NextResponse.json({ message: limitError }, { status: 429 });
+  }
   const oldToken = req.cookies.get("refreshToken")?.value;
 
   if (!oldToken) {

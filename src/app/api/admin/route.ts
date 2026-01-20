@@ -1,20 +1,15 @@
-import { requireAuth } from "@/src/lib/authGuard";
-import { requireRole } from "@/src/lib/roleGuard";
+import { authenticate } from "@/src/lib/auth";
+import { requireAdmin } from "@/src/lib/roleGuard";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = requireAuth(req);
-    if (auth.error) return auth.error;
-    const roleError = requireRole(["ADMIN"])(req);
-
-    if (roleError) {
-      return roleError;
-    }
+    const user = authenticate(req);
+    requireAdmin(user);
 
     return NextResponse.json({
       message: "Welcome admin",
-      user: auth.user,
+      user,
     });
   } catch (error: any) {
     if (error.message === "FORBIDDEN") {
