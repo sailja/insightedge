@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
       message: "Welcome admin",
       user,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.message === "FORBIDDEN") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });

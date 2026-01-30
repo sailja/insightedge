@@ -5,6 +5,7 @@ export interface AuthPayload {
   id: string;
   email: string;
   role: "USER" | "ADMIN";
+  permissions: { name: string }[];
 }
 
 export function authenticate(req: NextRequest): AuthPayload {

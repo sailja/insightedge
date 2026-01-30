@@ -1,17 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const { user, loading, logout } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    }
-  }, [router]);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  return <h1>Dashboard (Protected)</h1>;
+  if (!user) {
+    return <div>Redirecting to login...</div>;
+  }
+
+  return (
+    <div>
+      <h1>Welcome {user.email}</h1>
+      <p>Role: {user.role}</p>
+      <p>Permissions: {user.permissions.join(", ")}</p>
+
+      <button onClick={logout}>Logout</button>
+    </div>
+  );
 }

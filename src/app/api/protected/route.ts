@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = authenticate(req as any);
+    const user = await authenticate(req);
     return NextResponse.json({ user });
   } catch {
     return NextResponse.json({ message: "unauthorized" }, { status: 401 });

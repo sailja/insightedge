@@ -15,6 +15,13 @@ model User {
   role          Role           @default(USER)
   createdAt     DateTime       @default(now())
   refreshTokens RefreshToken[]
+  permissions Permission[]
+}
+
+model Permission {
+  id    String @id @default(uuid())
+  name  String @unique
+  users User[]
 }
 
 model RefreshToken {

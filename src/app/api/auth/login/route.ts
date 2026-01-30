@@ -6,7 +6,7 @@ import { loginSchema } from "@/src/validators/auth.schema";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forward-for") || "unknown";
+  const ip = request.headers.get("x-forwarded-for") || "unknown";
   const limitError = rateLimit(`login:${ip}`);
 
   if (limitError) {
@@ -26,8 +26,8 @@ export async function POST(request: Request) {
       id: user.id,
       email: user.email,
       role: user.role,
+      permissions: user.permissions.map((p) => p.name),
     });
-
     const refreshToken = generateRefreshToken();
 
     const response = NextResponse.json({
@@ -37,13 +37,14 @@ export async function POST(request: Request) {
         id: user.id,
         email: user.email,
         role: user.role,
+        permissions: user.permissions.map((p) => p.name),
       },
     });
 
     response.cookies.set("accessToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 15, //1 day
     });

@@ -17,20 +17,19 @@ export default function LoginPage() {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      setError(data.error || "Login failed");
-      return;
+      const text = await res.text(); // 👈 avoids JSON crash
+      throw new Error(text || "Login failed");
     }
 
-    // 🔐 Store token
-    localStorage.setItem("token", data.token);
-
-    router.push("/dashboard");
+    if (res.ok) {
+      router.push("/dashboard");
+      router.refresh();
+    }
   };
 
   return (

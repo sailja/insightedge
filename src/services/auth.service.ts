@@ -1,10 +1,12 @@
 import { comparePassword, hashPassword } from "@/src/lib/password";
 import { prisma } from "@/src/lib/prisma";
-import { NextResponse } from "next/server";
 
 export async function loginUser(email: string, password: string) {
   const user = await prisma.user.findUnique({
     where: { email },
+    include: {
+      permissions: true,
+    },
   });
 
   if (!user) {

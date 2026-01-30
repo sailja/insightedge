@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.message === "USER_EXISTS") {
       return NextResponse.json({ error: "User already exists" }, { status: 400 });
